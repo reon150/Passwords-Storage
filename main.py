@@ -2,17 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import db
-from cryptography.fernet import Fernet
 
 
 class MainApplication:
 
     def __init__(self, master):
-
+        # the login window design
         self.large_font = ('Verdana', 25)
         self.small_font = ('Verdana', 10)
-        self.key = "Be1PA8snHgb1DS6oaWek62WLE9nxipFw3o3vB4uJ8ZI="
-        self.cipher_suite = Fernet(self.key)
         self.user = tk.StringVar()
         self.password = tk.StringVar()
 
@@ -44,8 +41,9 @@ class MainApplication:
         self.password.trace("w", lambda *args: self.character_limit(self.password))
 
     def log_in(self):
+        """Verify the account, if it does not exist, ask to create a new"""
 
-        value = db.loginUser(self.user.get(),self.password.get())
+        value = db.loginUser(self.user.get(), self.password.get())
         if value == "yes":
             self.password = ""
             self.passwordStorageWindow()
@@ -54,11 +52,12 @@ class MainApplication:
         elif value == "error":
             answer = messagebox.askquestion("Unregistered User", "Do you want to create a new one?")
             if answer == "yes":
-                db.createUser(self.user.get(),self.password.get())
+                db.createUser(self.user.get(), self.password.get())
                 self.password = ""
                 self.passwordStorageWindow()
 
     def passwordStorageWindow(self):
+        # The storage window design
         self.newNameList = tk.StringVar()
         self.newPasswordList = tk.StringVar()
 
@@ -127,19 +126,22 @@ class MainApplication:
         self.newNameList.trace("w", lambda *args: self.character_limit(self.newNameList))
         self.newPasswordList.trace("w", lambda *args: self.character_limit(self.newPasswordList))
 
+        self.passwordsScreen.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         self.passwordTabler()
 
-    def character_limit(self,entry_text):
+    def character_limit(self, entry_text):
+        """limit the length of a StringVar to 16"""
         value = entry_text.get()
         if len(value) > 16:
             entry_text.set(value[:16])
 
     def readNotes(self, event):
-
+        """ Create a extra notes window after double clicking the password"""
         name = self.passwordsList.item(self.passwordsList.selection(), "text")
         notes = db.readNotes(self.user.get(), name)
 
-        if notes==[]:
+        if not notes:
             pass
         else:
             self.notesScreen = tk.Toplevel(self.passwordsScreen)
@@ -148,28 +150,30 @@ class MainApplication:
             self.label = tk.Label(self.notesScreen, text=notes[0][0], font=("Arial", 30)).grid(row=0, columnspan=3)
 
     def deleterow(self, event):
+        """Delete a password after press the backspace key or delete key from the keyboard"""
         name = self.passwordsList.item(self.passwordsList.selection(), "text")
         row_selected = self.passwordsList.selection()
 
         answer = messagebox.askquestion("Delete Password", "Are you sure you want to delete "+name+" password?")
         if answer == "yes":
-            db.erasePassword(self.user.get(), name)
+            db.deletePassword(self.user.get(), name)
             self.passwordsList.delete(row_selected)
 
     def passwordTabler(self):
+        # Create the table where the passwords are
         self.tempList = db.readPasswords(self.user.get())
 
         for i, (name, password, notes) in enumerate(self.tempList, start=1):
-            decoded_text = self.cipher_suite.decrypt(password)
-            decoded_text = decoded_text.decode("utf-8")
-            self.passwordsList.insert("", "end", text=name,values=( decoded_text, notes.partition('\n')[0]))
+            db.decoded_text = db.cipher_suite.decrypt(password)
+            db.decoded_text = db.decoded_text.decode("utf-8")
+            self.passwordsList.insert("", "end", text=name, values=(password, notes.partition('\n')[0]))
 
     def insertNewPassword(self):
+        # Add new password to the storage
         if self.newPasswordList.get().isspace() or self.newPasswordList.get() == "" or self.newNameList.get().isspace() or self.newNameList.get() == "":
             messagebox.showwarning("Warning!", "Name and Password cannot be empty")
         else:
-            encoded_text = self.cipher_suite.encrypt(bytes(self.newPasswordList.get(), encoding='utf-8'))
-            db.insertPasswordData(self.user.get(), self.newNameList.get(), encoded_text, self.noteText.get("1.0", tk.END))
+            db.insertPasswordData(self.user.get(), self.newNameList.get(), self.newPasswordList.get(), self.noteText.get("1.0", tk.END))
             self.newNameList.set("")
             self.newPasswordList.set("")
             self.noteText.delete(1.0, tk.END)
@@ -177,6 +181,10 @@ class MainApplication:
             self.passwordsList.delete(*self.passwordsList.get_children())
             self.passwordTabler()
 
+    def on_closing(self):
+        # Stop the procces
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            root.destroy()
 
 
 if __name__ == "__main__":
