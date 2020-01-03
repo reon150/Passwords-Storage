@@ -13,12 +13,10 @@ def conectionDB(func):
         myConection.close()
 
         return result
-
     return wrapper
 
 @conectionDB
 def createDB():
-
     try:
         myCursor.execute('''
             CREATE TABLE USERS (
@@ -37,9 +35,8 @@ def createDB():
     except sqlite3.OperationalError:
         pass
 
-
 @conectionDB
-def loginUser(user,password):
+def loginUser(user, password):
     myCursor.execute("SELECT PASSWORD FROM USERS WHERE USER='" + user + "'")
     passwordDB = myCursor.fetchall()
 
@@ -53,36 +50,28 @@ def loginUser(user,password):
         return "error"
 
 @conectionDB
-def createUser(user,password):
-
-    data = (user,password)
+def createUser(user, password):
+    data = (user, password)
     myCursor.execute("INSERT INTO USERS VALUES(?,?)", data)
 
 @conectionDB
-def insertPasswordData(user,name,password,notes):
-
-    data = (user,name,password,notes)
+def insertPasswordData(user, name, password, notes):
+    data = (user, name, password, notes)
     myCursor.execute("INSERT INTO PASSWORDS_DATA VALUES(?,?,?,?)", data)
 
 @conectionDB
 def readPasswords(user):
-
-    myCursor.execute("SELECT NAME,PASSWORD,NOTES FROM PASSWORDS_DATA WHERE USER='" + user + "'")
+    myCursor.execute("SELECT NAME,PASSWORD,NOTES FROM PASSWORDS_DATA WHERE USER='"+user+"'")
     theUser = myCursor.fetchall()
     return theUser
 
 @conectionDB
-def erasePassword(user,name):
-    myCursor.execute("DELETE FROM PASSWORDS_DATA WHERE USER='" + user + "' AND NAME='" + name +"'")
-
+def erasePassword(user, name):
+    myCursor.execute("DELETE FROM PASSWORDS_DATA WHERE USER='"+user+"' AND NAME='"+name+"'")
 
 @conectionDB
-def readNotes(user,name):
-
-    myCursor.execute("SELECT NOTES FROM PASSWORDS_DATA WHERE USER='" + user + "' AND NAME='"+name+"'")
+def readNotes(user, name):
+    myCursor.execute("SELECT NOTES FROM PASSWORDS_DATA WHERE USER='"+user+"' AND NAME='"+name+"'")
     theUser = myCursor.fetchall()
 
     return theUser
-
-
-
