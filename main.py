@@ -164,9 +164,9 @@ class MainApplication:
         self.tempList = db.readPasswords(self.user.get())
 
         for i, (name, password, notes) in enumerate(self.tempList, start=1):
-            db.decoded_text = db.cipher_suite.decrypt(password)
-            db.decoded_text = db.decoded_text.decode("utf-8")
-            self.passwordsList.insert("", "end", text=name, values=(password, notes.partition('\n')[0]))
+            decoded_pass = db.cipher_suite.decrypt(password)
+            decoded_pass = decoded_pass.decode("utf-8")
+            self.passwordsList.insert("", "end", text=name, values=(decoded_pass, notes.partition('\n')[0]))
 
     def insertNewPassword(self):
         # Add new password to the storage
