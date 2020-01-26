@@ -8,7 +8,7 @@ A basic GUI that allows you to store your passwords, with a name and a note
 - sqlite3
 - cryptography
 
-# Instructions
+# Instructions for using
 If you have not created an account yet, try logging in with the account you want and if it is not already in use it will allow you to create it
 
 To delete one password, just selected and press backspace or delete from your keyboard
