@@ -1,6 +1,6 @@
 antiorm==1.2.1
 cffi==1.14.5
-cryptography==3.4.7
+cryptography==39.0.1
 db==0.1.1
 db-sqlite3==0.0.1
 pycparser==2.20
